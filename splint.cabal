@@ -1,0 +1,26 @@
+name: splint
+version: 0.0.0.0
+
+build-type: Simple
+cabal-version: >= 1.10
+category: Development
+description: Splint is HLint as a GHC source plugin.
+license-file: LICENSE.markdown
+license: ISC
+maintainer: Taylor Fausak
+synopsis: HLint as a GHC source plugin.
+
+library
+  build-depends:
+    base >= 4.14.0 && < 4.15
+    , ghc >= 8.10.1 && < 8.11
+    , hlint >= 3.1.1 && < 3.2
+  default-language: Haskell2010
+  exposed-modules: Splint
+  ghc-options:
+    -Weverything
+    -Wno-implicit-prelude
+    -Wno-missing-safe-haskell-mode
+    -Wno-prepositive-qualified-module
+    -Wno-unsafe
+  hs-source-dirs: src/lib

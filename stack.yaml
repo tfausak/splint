@@ -1,0 +1,6 @@
+snapshot: lts-15.13
+compiler: ghc-8.10.1
+extra-deps:
+  - extra-1.7.1
+  - ghc-lib-parser-ex-8.10.0.10
+  - hlint-3.1.1
