@@ -1,5 +1,9 @@
 # Splint
 
+[![Travis CI](https://travis-ci.org/tfausak/splint.svg?branch=master)](https://travis-ci.org/tfausak/splint)
+[![Hackage](https://img.shields.io/hackage/v/splint)](https://hackage.haskell.org/package/splint)
+[![Stackage](https://www.stackage.org/package/splint/badge/nightly?label=stackage)](https://www.stackage.org/package/splint)
+
 Splint is a proof of concept, showing how to use [HLint 3][] as a [GHC source
 plugin][]. It is similar to [hlint-source-plugin][] by Ollie Charles, except
 that it doesn't have to re-parse the module in order to lint it.

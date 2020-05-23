@@ -1,4 +1,4 @@
-snapshot: lts-15.13
+resolver: lts-15.13
 compiler: ghc-8.10.1
 extra-deps:
   - extra-1.7.1
