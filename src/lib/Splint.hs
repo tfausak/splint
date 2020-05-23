@@ -61,7 +61,9 @@ ideaToWarnMsg dynFlags idea =
 
 ideaToMsgDoc :: HLint.Idea -> GHC.MsgDoc
 ideaToMsgDoc idea = GHC.vcat
-  [ GHC.text $ show (HLint.ideaSeverity idea) <> ": " <> HLint.ideaHint idea
-  , maybe GHC.empty (GHC.text . mappend "Why not: ") $ HLint.ideaTo idea
+  [ GHC.text $ HLint.ideaHint idea
+  , case HLint.ideaTo idea of
+    Just to | not $ null to -> GHC.text $ "Perhaps: " <> to
+    _ -> GHC.empty
   , GHC.vcat . fmap (GHC.text . mappend "Note: " . show) $ HLint.ideaNote idea
   ]

@@ -28,8 +28,8 @@ Among all the usual output from GHC, you should see this new warning:
 
 ```
 Main.hs:1:8: warning:
-    Warning: Use concatMap
-    Why not: print (concatMap pure ['a' .. 'z'])
+    Use concatMap
+    Perhaps: print (concatMap pure ['a' .. 'z'])
   |
 1 | main = print . concat $ map pure [ 'a' .. 'z' ]
   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -40,7 +40,7 @@ process. What a time to be alive.
 
 If you want to pass arguments through to HLint, you can use
 `-fplugin-opt=Splint:arg`. For example you can ignore the warning above with
-`-fplugin-opt=Splint:'--ignore=Redundant $'`.
+`-fplugin-opt=Splint:'--ignore=Use concatMap'`.
 
 ## To do
 
@@ -52,7 +52,7 @@ ready for production:
 - [x] Accept command-line options using `-fplugin-opt=Splint:something`.
 - [x] Reliably read HLint configuration.
 - [x] Avoid re-reading HLint config for each source file.
-- [ ] Figure out a good output format for the warnings.
+- [x] Figure out a good output format for the warnings.
 - [ ] Publish to Hackage.
 
 [HLint 3]: https://neilmitchell.blogspot.com/2020/05/hlint-30.html
