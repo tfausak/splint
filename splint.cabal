@@ -5,6 +5,7 @@ build-type: Simple
 cabal-version: >= 1.10
 category: Development
 description: Splint is HLint as a GHC source plugin.
+extra-source-files: README.markdown
 license-file: LICENSE.markdown
 license: ISC
 maintainer: Taylor Fausak
