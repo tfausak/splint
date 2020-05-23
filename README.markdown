@@ -38,6 +38,10 @@ Main.hs:1:8: warning:
 And that's all there is to it! HLint suggestions as part of your normal build
 process. What a time to be alive.
 
+If you want to pass arguments through to HLint, you can use
+`-fplugin-opt=Splint:arg`. For example you can ignore the warning above with
+`-fplugin-opt=Splint:'--ignore=Redundant $'`.
+
 ## To do
 
 As stated, Splint is basically a tech demo. Although it's usable in its current
@@ -45,9 +49,9 @@ form, there is some low hanging fruit to fix before it should be considered
 ready for production:
 
 - [ ] Work with versions of GHC older than 8.10.
-- [ ] Accept command-line options using `-fplugin-opt=Splint:something`.
-- [ ] Reliably read HLint configuration.
-- [ ] Avoid re-reading HLint config for each source file.
+- [x] Accept command-line options using `-fplugin-opt=Splint:something`.
+- [x] Reliably read HLint configuration.
+- [x] Avoid re-reading HLint config for each source file.
 - [ ] Figure out a good output format for the warnings.
 - [ ] Publish to Hackage.
 

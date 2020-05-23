@@ -1,9 +1,11 @@
 module Splint ( plugin ) where
 
 import qualified Bag as GHC
+import qualified Data.IORef as IORef
 import qualified ErrUtils as GHC
 import qualified GhcPlugins as GHC
 import qualified Language.Haskell.HLint as HLint
+import qualified System.IO.Unsafe as Unsafe
 
 plugin :: GHC.Plugin
 plugin = GHC.defaultPlugin
@@ -16,10 +18,10 @@ action
   -> GHC.ModSummary
   -> GHC.HsParsedModule
   -> GHC.Hsc GHC.HsParsedModule
-action _ _ hsParsedModule = do
+action commandLineOptions _modSummary hsParsedModule = do
   dynFlags <- GHC.getDynFlags
   GHC.liftIO $ do
-    (_parseFlags, classifies, hint) <- HLint.autoSettings
+    (_parseFlags, classifies, hint) <- getSettings commandLineOptions
     let
       apiAnns = GHC.hpm_annotations hsParsedModule
       hsModule = GHC.hpm_module hsParsedModule
@@ -30,6 +32,22 @@ action _ _ hsParsedModule = do
       . fmap (ideaToWarnMsg dynFlags)
       $ filter ((/= HLint.Ignore) . HLint.ideaSeverity) ideas
   pure hsParsedModule
+
+type Settings = (HLint.ParseFlags, [HLint.Classify], HLint.Hint)
+
+getSettings :: [GHC.CommandLineOption] -> IO Settings
+getSettings commandLineOptions = do
+  maybeSettings <- IORef.readIORef settingsRef
+  case maybeSettings of
+    Just settings -> pure settings
+    Nothing -> do
+      settings <- HLint.argsSettings commandLineOptions
+      IORef.writeIORef settingsRef $ Just settings
+      pure settings
+
+{-# NOINLINE settingsRef #-}
+settingsRef :: IORef.IORef (Maybe Settings)
+settingsRef = Unsafe.unsafePerformIO $ IORef.newIORef Nothing
 
 ideaToWarnMsg :: GHC.DynFlags -> HLint.Idea -> GHC.WarnMsg
 ideaToWarnMsg dynFlags idea =
