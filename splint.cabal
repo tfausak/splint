@@ -1,15 +1,20 @@
 name: splint
 version: 1.0.0.0
 
+synopsis: HLint as a GHC source plugin.
+description:
+  Splint makes HLint 3 available as a GHC source plugin. To use it, pass
+  @-fplugin=Splint@ to GHC. Any options passed to Splint are passed through to
+  HLint. For example you can use @-fplugin-opt=Splint:'--ignore=Use concatMap'@
+  to ignore the "Use @concatMap@" suggestion.
+
 build-type: Simple
 cabal-version: >= 1.10
 category: Development
-description: Splint is HLint as a GHC source plugin.
 extra-source-files: README.markdown
 license-file: LICENSE.markdown
 license: ISC
 maintainer: Taylor Fausak
-synopsis: HLint as a GHC source plugin.
 
 source-repository head
   location: https://github.com/tfausak/splint

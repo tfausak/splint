@@ -4,9 +4,9 @@
 [![Hackage](https://img.shields.io/hackage/v/splint)](https://hackage.haskell.org/package/splint)
 [![Stackage](https://www.stackage.org/package/splint/badge/nightly?label=stackage)](https://www.stackage.org/package/splint)
 
-Splint is a proof of concept, showing how to use [HLint 3][] as a [GHC source
-plugin][]. It is similar to [hlint-source-plugin][] by Ollie Charles, except
-that it doesn't have to re-parse the module in order to lint it.
+Splint makes [HLint 3][] available as a [GHC source plugin][]. It is similar to
+[hlint-source-plugin][] by Ollie Charles, except that it doesn't have to
+re-parse the module in order to lint it.
 
 To use Splint, pass `-fplugin=Splint` to GHC. Any ideas suggested by HLint will
 be reported as warnings by GHC. For example, if you define `Main.hs` as:
@@ -83,19 +83,6 @@ However it's also got some downsides:
 -   You can't use the automated refactorings that HLint provides.
 
 -   Using plugins marks every module as unsafe.
-
-## To do
-
-As stated, Splint is basically a tech demo. Although it's usable in its current
-form, there is some low hanging fruit to fix before it should be considered
-ready for production:
-
-- [ ] Work with versions of GHC older than 8.10.
-- [x] Accept command-line options using `-fplugin-opt=Splint:something`.
-- [x] Reliably read HLint configuration.
-- [x] Avoid re-reading HLint config for each source file.
-- [x] Figure out a good output format for the warnings.
-- [x] Publish to Hackage.
 
 [HLint 3]: https://neilmitchell.blogspot.com/2020/05/hlint-30.html
 [GHC source plugin]: https://downloads.haskell.org/~ghc/8.10.1/docs/html/users_guide/extending_ghc.html#source-plugins
