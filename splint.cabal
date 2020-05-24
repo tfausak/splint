@@ -11,6 +11,10 @@ license: ISC
 maintainer: Taylor Fausak
 synopsis: HLint as a GHC source plugin.
 
+source-repository head
+  location: https://github.com/tfausak/splint
+  type: git
+
 library
   build-depends:
     base >= 4.14.0 && < 4.15
