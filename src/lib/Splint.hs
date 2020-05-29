@@ -40,35 +40,30 @@ action commandLineOptions modSummary hsParsedModule = do
 
 type Settings = (HLint.ParseFlags, [HLint.Classify], HLint.Hint)
 
-getSettings :: [GHC.CommandLineOption] -> GHC.Hsc Settings
-getSettings commandLineOptions = do
+getSettings :: [String] -> GHC.Hsc Settings
+getSettings options = do
   remoteData <- io . stm $ do
     settings <- Stm.readTVar settingsTVar
-    let remoteData = Map.findWithDefault NotAsked commandLineOptions settings
+    let remoteData = Map.findWithDefault NotAsked options settings
     case remoteData of
-      NotAsked ->
-        Stm.modifyTVar settingsTVar $ Map.insert commandLineOptions Loading
+      NotAsked -> Stm.modifyTVar settingsTVar $ Map.insert options Loading
       _ -> pure ()
     pure remoteData
   case remoteData of
     NotAsked -> io . withTMVar settingsTMVar . const $ do
-      result <- Exception.try $ HLint.argsSettings commandLineOptions
+      result <- Exception.try $ HLint.argsSettings options
       case result of
         Left ioException -> do
-          stm
-            . Stm.modifyTVar settingsTVar
-            . Map.insert commandLineOptions
-            $ Failure ioException
+          stm . Stm.modifyTVar settingsTVar . Map.insert options $ Failure
+            ioException
           Exception.throwIO ioException
         Right settings -> do
-          stm
-            . Stm.modifyTVar settingsTVar
-            . Map.insert commandLineOptions
-            $ Success settings
+          stm . Stm.modifyTVar settingsTVar . Map.insert options $ Success
+            settings
           pure settings
     Loading -> do
       io $ Concurrent.threadDelay 1000
-      getSettings commandLineOptions
+      getSettings options
     Failure ioException -> io $ Exception.throwIO ioException
     Success settings -> pure settings
 
@@ -82,18 +77,23 @@ withTMVar :: Stm.TMVar a -> (a -> IO b) -> IO b
 withTMVar var =
   Exception.bracket (stm $ Stm.takeTMVar var) (stm . Stm.putTMVar var)
 
-{-# NOINLINE settingsTVar #-}
+-- | Getting settings is not instantaneous. Since settings are usually reused
+-- between modules, it makes sense to cache them. However each module can
+-- potentially customize its settings using the @OPTIONS_GHC@ pragma. This
+-- variable is used as a cache of settings keyed on the command line options.
 settingsTVar
-  :: Stm.TVar
-       ( Map.Map
-           [GHC.CommandLineOption]
-           (RemoteData Exception.IOException Settings)
-       )
+  :: Stm.TVar (Map.Map [String] (RemoteData Exception.IOException Settings))
 settingsTVar = Unsafe.unsafePerformIO $ Stm.newTVarIO Map.empty
+{-# NOINLINE settingsTVar #-}
 
-{-# NOINLINE settingsTMVar #-}
+-- | Even though we cache settings based on command line options, we only want
+-- to load settings one at a time. Practically this is to work around a bug in
+-- GHC. But aside from that, loading settings calls @withArgs@ and doing that
+-- simultaneously in separate threads is dubious.
+-- <https://gitlab.haskell.org/ghc/ghc/issues/18261>
 settingsTMVar :: Stm.TMVar ()
 settingsTMVar = Unsafe.unsafePerformIO $ Stm.newTMVarIO ()
+{-# NOINLINE settingsTMVar #-}
 
 data RemoteData e a
   = NotAsked
