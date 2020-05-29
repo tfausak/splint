@@ -46,8 +46,10 @@ library
 
   build-depends:
     base >= 4.12.0 && < 4.15
+    , containers >= 0.6.0 && < 0.7
     , ghc >= 8.6.1 && < 8.11
     , hlint >= 3.0 && < 3.2
+    , stm >= 2.5.0 && < 2.6
   exposed-modules: Splint
   hs-source-dirs: src/lib
   other-modules: Splint.Parser

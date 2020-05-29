@@ -4,7 +4,11 @@ module Splint
 where
 
 import qualified Bag as GHC
-import qualified Data.IORef as IORef
+import qualified Control.Concurrent as Concurrent
+import qualified Control.Concurrent.STM as Stm
+import qualified Control.Exception as Exception
+import qualified Control.Monad.IO.Class as IO
+import qualified Data.Map as Map
 import qualified ErrUtils as GHC
 import qualified GhcPlugins as GHC
 import qualified Language.Haskell.HLint as HLint
@@ -26,7 +30,7 @@ action commandLineOptions modSummary hsParsedModule = do
   (parseFlags, classifies, hint) <- getSettings commandLineOptions
   moduleEx <- Splint.parse parseFlags modSummary hsParsedModule
   dynFlags <- GHC.getDynFlags
-  GHC.liftIO
+  io
     . GHC.printOrThrowWarnings dynFlags
     . GHC.listToBag
     . fmap (ideaToWarnMsg dynFlags)
@@ -37,18 +41,66 @@ action commandLineOptions modSummary hsParsedModule = do
 type Settings = (HLint.ParseFlags, [HLint.Classify], HLint.Hint)
 
 getSettings :: [GHC.CommandLineOption] -> GHC.Hsc Settings
-getSettings commandLineOptions = GHC.liftIO $ do
-  maybeSettings <- IORef.readIORef settingsRef
-  case maybeSettings of
-    Just settings -> pure settings
-    Nothing -> do
-      settings <- HLint.argsSettings commandLineOptions
-      IORef.writeIORef settingsRef $ Just settings
-      pure settings
+getSettings commandLineOptions = do
+  remoteData <- io . stm $ do
+    settings <- Stm.readTVar settingsTVar
+    let remoteData = Map.findWithDefault NotAsked commandLineOptions settings
+    case remoteData of
+      NotAsked ->
+        Stm.modifyTVar settingsTVar $ Map.insert commandLineOptions Loading
+      _ -> pure ()
+    pure remoteData
+  case remoteData of
+    NotAsked -> io . withTMVar settingsTMVar . const $ do
+      result <- Exception.try $ HLint.argsSettings commandLineOptions
+      case result of
+        Left ioException -> do
+          stm
+            . Stm.modifyTVar settingsTVar
+            . Map.insert commandLineOptions
+            $ Failure ioException
+          Exception.throwIO ioException
+        Right settings -> do
+          stm
+            . Stm.modifyTVar settingsTVar
+            . Map.insert commandLineOptions
+            $ Success settings
+          pure settings
+    Loading -> do
+      io $ Concurrent.threadDelay 1000
+      getSettings commandLineOptions
+    Failure ioException -> io $ Exception.throwIO ioException
+    Success settings -> pure settings
 
-{-# NOINLINE settingsRef #-}
-settingsRef :: IORef.IORef (Maybe Settings)
-settingsRef = Unsafe.unsafePerformIO $ IORef.newIORef Nothing
+io :: IO.MonadIO m => IO a -> m a
+io = GHC.liftIO
+
+stm :: Stm.STM a -> IO a
+stm = Stm.atomically
+
+withTMVar :: Stm.TMVar a -> (a -> IO b) -> IO b
+withTMVar var =
+  Exception.bracket (stm $ Stm.takeTMVar var) (stm . Stm.putTMVar var)
+
+{-# NOINLINE settingsTVar #-}
+settingsTVar
+  :: Stm.TVar
+       ( Map.Map
+           [GHC.CommandLineOption]
+           (RemoteData Exception.IOException Settings)
+       )
+settingsTVar = Unsafe.unsafePerformIO $ Stm.newTVarIO Map.empty
+
+{-# NOINLINE settingsTMVar #-}
+settingsTMVar :: Stm.TMVar ()
+settingsTMVar = Unsafe.unsafePerformIO $ Stm.newTMVarIO ()
+
+data RemoteData e a
+  = NotAsked
+  | Loading
+  | Failure e
+  | Success a
+  deriving (Eq, Show)
 
 ideaToWarnMsg :: GHC.DynFlags -> HLint.Idea -> GHC.WarnMsg
 ideaToWarnMsg dynFlags idea =
