@@ -42,11 +42,12 @@ type Settings = (HLint.ParseFlags, [HLint.Classify], HLint.Hint)
 
 getSettings :: [String] -> GHC.Hsc Settings
 getSettings options = do
+  let insert = Stm.modifyTVar settingsTVar . Map.insert options
   remoteData <- io . stm $ do
     settings <- Stm.readTVar settingsTVar
     let remoteData = Map.findWithDefault NotAsked options settings
     case remoteData of
-      NotAsked -> Stm.modifyTVar settingsTVar $ Map.insert options Loading
+      NotAsked -> insert Loading
       _ -> pure ()
     pure remoteData
   case remoteData of
@@ -54,12 +55,10 @@ getSettings options = do
       result <- Exception.try $ HLint.argsSettings options
       case result of
         Left ioException -> do
-          stm . Stm.modifyTVar settingsTVar . Map.insert options $ Failure
-            ioException
+          stm . insert $ Failure ioException
           Exception.throwIO ioException
         Right settings -> do
-          stm . Stm.modifyTVar settingsTVar . Map.insert options $ Success
-            settings
+          stm . insert $ Success settings
           pure settings
     Loading -> do
       io $ Concurrent.threadDelay 1000
