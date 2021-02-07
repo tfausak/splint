@@ -1,6 +1,6 @@
 # Splint
 
-[![Travis CI](https://travis-ci.org/tfausak/splint.svg?branch=master)](https://travis-ci.org/tfausak/splint)
+[![CI](https://github.com/tfausak/splint/workflows/CI/badge.svg)](https://github.com/tfausak/splint/actions/new)
 [![Hackage](https://img.shields.io/hackage/v/splint)](https://hackage.haskell.org/package/splint)
 [![Stackage](https://www.stackage.org/package/splint/badge/nightly?label=stackage)](https://www.stackage.org/package/splint)
 
