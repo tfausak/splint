@@ -3,14 +3,14 @@ module Splint
   )
 where
 
-import qualified Bag as GHC
+import qualified Splint.GHC.Bag as GHC
 import qualified Control.Concurrent as Concurrent
 import qualified Control.Concurrent.STM as Stm
 import qualified Control.Exception as Exception
 import qualified Control.Monad.IO.Class as IO
 import qualified Data.Map as Map
-import qualified ErrUtils as GHC
-import qualified GhcPlugins as GHC
+import qualified Splint.GHC.Error as GHC
+import qualified Splint.GHC.Plugins as GHC
 import qualified Language.Haskell.HLint as HLint
 import qualified Splint.Parser as Splint
 import qualified System.IO.Unsafe as Unsafe
