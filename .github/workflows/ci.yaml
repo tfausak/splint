@@ -34,5 +34,5 @@ jobs:
           path: dist-newstyle/sdist/splint-*.tar.gz
           name: splint-${{ github.sha }}.tar.gz
       - run: cabal check
-      - if: github.event_name == 'release' && matrix.os == 'ubuntu' && matrix.ghc == '9.0.1'
+      - if: github.event_name == 'release' && matrix.os == 'ubuntu' && matrix.ghc == '9.0.2'
         run: cabal upload --publish --username '${{ secrets.HACKAGE_USERNAME }}' --password '${{ secrets.HACKAGE_PASSWORD }}' dist-newstyle/sdist/splint-*.tar.gz
