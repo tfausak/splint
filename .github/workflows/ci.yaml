@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - { os: ubuntu, ghc: 9.0.1 }
+          - { os: ubuntu, ghc: 9.0.2 }
           - { os: ubuntu, ghc: 8.10.7 }
           - { os: macos, ghc: 8.10.7 }
           - { os: windows, ghc: 8.10.7 }
