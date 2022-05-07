@@ -13,7 +13,6 @@ jobs:
           - { os: ubuntu, ghc: 8.10.7 }
           - { os: macos, ghc: 8.10.7 }
           - { os: windows, ghc: 8.10.7 }
-          - { os: ubuntu, ghc: 8.8.4 }
     runs-on: ${{ matrix.os }}-latest
     steps:
       - uses: actions/checkout@v2
