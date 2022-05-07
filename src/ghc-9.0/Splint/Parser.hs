@@ -1,7 +1,7 @@
 module Splint.Parser where
 
 import qualified Language.Haskell.HLint as HLint
-import qualified Splint.GHC.Plugins as GHC
+import qualified GHC.Plugins as GHC
 
 parse
   :: HLint.ParseFlags

@@ -2,7 +2,7 @@ module Splint.Parser where
 
 import qualified Control.Exception as Exception
 import qualified Language.Haskell.HLint as HLint
-import qualified Splint.GHC.Plugins as GHC
+import qualified GhcPlugins as GHC
 
 parse
   :: HLint.ParseFlags

@@ -40,9 +40,6 @@ library
     -Wno-unsafe
   hs-source-dirs: src/lib
   other-modules:
-    Splint.GHC.Bag
-    Splint.GHC.Error
-    Splint.GHC.Plugins
     Splint.Parser
 
   if impl(ghc >= 9.0)
