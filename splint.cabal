@@ -1,7 +1,7 @@
 cabal-version: >= 1.10
 
 name: splint
-version: 1.0.1.4
+version: 1.0.1.5
 
 synopsis: HLint as a GHC source plugin.
 description:
