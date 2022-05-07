@@ -41,12 +41,8 @@ library
     -Wno-prepositive-qualified-module
     -Wno-unsafe
   hs-source-dirs: src/lib
-  other-modules:
-    Splint.Parser
 
   if impl(ghc >= 9.0)
     build-depends: ghc >= 9.0 && < 9.1, hlint >= 3.3 && < 3.4
-    hs-source-dirs: src/ghc-9.0
   else
     build-depends: ghc >= 8.10 && < 8.11, hlint >= 3.2 && < 3.3
-    hs-source-dirs: src/ghc-8.10
