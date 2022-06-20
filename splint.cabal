@@ -5,7 +5,7 @@ version: 1.0.1.5
 
 synopsis: HLint as a GHC source plugin.
 description:
-  Splint makes HLint 3 available as a GHC source plugin. To use it, pass
+  Splint makes HLint available as a GHC source plugin. To use it, pass
   @-fplugin=Splint@ to GHC. Any options passed to Splint are passed through to
   HLint. For example you can use @-fplugin-opt=Splint:'--ignore=Use concatMap'@
   to ignore the "Use @concatMap@" suggestion.
@@ -23,13 +23,16 @@ source-repository head
 
 library
   build-depends:
-    base >= 4.13.0 && < 4.16
-    , containers >= 0.6.2 && < 0.7
-    , ghc >= 8.10 && < 8.11 || >= 9.0 && < 9.1
+    base >= 4.14 && < 4.17
+    , containers >= 0.6 && < 0.7
+    , ghc >= 8.10 && < 8.11 || >= 9.0 && < 9.3
     , hlint
-    , stm >= 2.5.0 && < 2.6
+    , stm >= 2.5 && < 2.6
   default-language: Haskell2010
-  exposed-modules: Splint
+  exposed-modules:
+    Splint
+    Splint.RemoteData
+    Splint.Settings
   ghc-options:
     -Weverything
     -Wno-implicit-prelude
@@ -39,10 +42,18 @@ library
     -Wno-missing-import-lists
     -Wno-missing-safe-haskell-mode
     -Wno-prepositive-qualified-module
+    -Wno-safe
     -Wno-unsafe
   hs-source-dirs: src/lib
 
-  if impl(ghc >= 9.0)
-    build-depends: hlint >= 3.3 && < 3.4
+  if impl(ghc >= 9.2)
+    build-depends: hlint >= 3.4 && < 3.5
+    ghc-options: -Wno-missing-kind-signatures
+    hs-source-dirs: src/ghc-9.2
   else
-    build-depends: hlint >= 3.2 && < 3.3
+    if impl(ghc >= 9.0)
+      build-depends: hlint >= 3.3 && < 3.4
+      hs-source-dirs: src/ghc-9.0
+    else
+      build-depends: hlint >= 3.2 && < 3.3
+      hs-source-dirs: src/ghc-8.10
