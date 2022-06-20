@@ -18,7 +18,7 @@ action
   -> GHC.HsParsedModule
   -> GHC.Hsc GHC.HsParsedModule
 action commandLineOptions modSummary hsParsedModule = do
-  (parseFlags, classifies, hint) <- Settings.load commandLineOptions
+  (parseFlags, classifies, hint) <- GHC.liftIO $ Settings.load commandLineOptions
   moduleEx <- parse parseFlags modSummary hsParsedModule
   dynFlags <- GHC.getDynFlags
   GHC.liftIO
