@@ -1,0 +1,10 @@
+packages: .
+
+package hlint
+  flags: -ghc-lib
+
+-- https://github.com/ndmitchell/hlint/pull/1410
+source-repository-package
+  location: https://github.com/ndmitchell/hlint
+  tag: 665403d7bd4d68d384bed77b423be0f8c329657a
+  type: git
