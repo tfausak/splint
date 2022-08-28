@@ -4,6 +4,8 @@
 [![Hackage](https://img.shields.io/hackage/v/splint)](https://hackage.haskell.org/package/splint)
 [![Stackage](https://www.stackage.org/package/splint/badge/nightly?label=stackage)](https://www.stackage.org/package/splint)
 
+:warning: This package is not maintained anymore.
+
 Splint makes [HLint 3][] available as a [GHC source plugin][]. It is similar to
 [hlint-source-plugin][] by Ollie Charles, except that it doesn't have to
 re-parse the module in order to lint it.

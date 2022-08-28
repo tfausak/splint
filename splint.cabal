@@ -1,10 +1,12 @@
 cabal-version: >= 1.10
 
 name: splint
-version: 1.0.2.0
+version: 1.0.2.1
 
 synopsis: HLint as a GHC source plugin.
 description:
+  Warning: This package is not maintained anymore.
+  .
   Splint makes HLint available as a GHC source plugin. To use it, pass
   @-fplugin=Splint@ to GHC. Any options passed to Splint are passed through to
   HLint. For example you can use @-fplugin-opt=Splint:'--ignore=Use concatMap'@
