@@ -1,0 +1,8 @@
+packages: .
+with-compiler: ghc-9.6
+
+package ghc-lib-parser-ex
+  flags: +no-ghc-lib
+
+package hlint
+  flags: -ghc-lib

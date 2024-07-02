@@ -13,9 +13,9 @@ type Settings = (HLint.ParseFlags, [HLint.Classify], HLint.Hint)
 -- between modules, it makes sense to cache them. However each module can
 -- potentially customize its settings using the @OPTIONS_GHC@ pragma. This
 -- variable is used as a cache of settings keyed on the command line options.
-cache
-  :: Stm.TVar
-       (Map.Map [String] (RemoteData.RemoteData Exception.IOException Settings))
+cache ::
+  Stm.TVar
+    (Map.Map [String] (RemoteData.RemoteData Exception.IOException Settings))
 cache = Unsafe.unsafePerformIO $ Stm.newTVarIO Map.empty
 {-# NOINLINE cache #-}
 
@@ -29,17 +29,17 @@ semaphore = Unsafe.unsafePerformIO $ Stm.newTMVarIO ()
 {-# NOINLINE semaphore #-}
 
 withTMVar :: Stm.TMVar a -> (a -> IO b) -> IO b
-withTMVar x = Exception.bracket
-  (Stm.atomically $ Stm.takeTMVar x)
-  (Stm.atomically . Stm.putTMVar x)
+withTMVar x =
+  Exception.bracket
+    (Stm.atomically $ Stm.takeTMVar x)
+    (Stm.atomically . Stm.putTMVar x)
 
 load :: [String] -> IO Settings
 load commandLineOptions = do
   remoteData <- Stm.atomically $ do
     settings <- Stm.readTVar cache
-    let
-      remoteData =
-        Map.findWithDefault RemoteData.NotAsked commandLineOptions settings
+    let remoteData =
+          Map.findWithDefault RemoteData.NotAsked commandLineOptions settings
     case remoteData of
       RemoteData.NotAsked ->
         Stm.modifyTVar cache $ Map.insert commandLineOptions RemoteData.Loading
@@ -47,8 +47,12 @@ load commandLineOptions = do
       _ -> pure ()
     pure remoteData
   case remoteData of
-    RemoteData.NotAsked -> withTMVar semaphore . const $ do
-      result <- Exception.try $ HLint.argsSettings commandLineOptions
+    RemoteData.NotAsked -> do
+      result <-
+        withTMVar semaphore
+          . const
+          . Exception.try
+          $ HLint.argsSettings commandLineOptions
       case result of
         Left ioException -> do
           Stm.atomically

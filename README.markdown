@@ -1,10 +1,7 @@
 # Splint
 
-[![CI](https://github.com/tfausak/splint/workflows/CI/badge.svg)](https://github.com/tfausak/splint/actions/new)
-[![Hackage](https://img.shields.io/hackage/v/splint)](https://hackage.haskell.org/package/splint)
-[![Stackage](https://www.stackage.org/package/splint/badge/nightly?label=stackage)](https://www.stackage.org/package/splint)
-
-:warning: This package is not maintained anymore.
+[![CI](https://github.com/tfausak/splint/actions/workflows/ci.yml/badge.svg)](https://github.com/tfausak/splint/actions/workflows/ci.yml)
+[![Hackage](https://badgen.net/hackage/v/splint)](https://hackage.haskell.org/package/splint)
 
 Splint makes [HLint 3][] available as a [GHC source plugin][]. It is similar to
 [hlint-source-plugin][] by Ollie Charles, except that it doesn't have to
@@ -31,7 +28,7 @@ Among all the usual output from GHC, you should see this new warning:
 ```
 Main.hs:1:8: warning:
     Use concatMap
-    Perhaps: print (concatMap pure ['a' .. 'z'])
+    Suggested fix: print (concatMap pure ['a' .. 'z'])
   |
 1 | main = print . concat $ map pure [ 'a' .. 'z' ]
   |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
