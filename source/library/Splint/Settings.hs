@@ -7,7 +7,7 @@ import qualified Language.Haskell.HLint as HLint
 import qualified Splint.RemoteData as RemoteData
 import qualified System.IO.Unsafe as Unsafe
 
-type Settings = (HLint.ParseFlags, [HLint.Classify], HLint.Hint)
+type Settings = ([HLint.Classify], HLint.Hint)
 
 -- | Getting settings is not instantaneous. Since settings are usually reused
 -- between modules, it makes sense to cache them. However each module can
@@ -60,12 +60,12 @@ load commandLineOptions = do
             . Map.insert commandLineOptions
             $ RemoteData.Failure ioException
           Exception.throwIO ioException
-        Right settings -> do
+        Right (_, classifies, hint) -> do
           Stm.atomically
             . Stm.modifyTVar cache
             . Map.insert commandLineOptions
-            $ RemoteData.Success settings
-          pure settings
+            $ RemoteData.Success (classifies, hint)
+          pure (classifies, hint)
     RemoteData.Loading -> load commandLineOptions
     RemoteData.Failure ioException -> Exception.throwIO ioException
     RemoteData.Success settings -> pure settings

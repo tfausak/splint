@@ -34,11 +34,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - ghc: 9.6
+          - ghc: 9.8
             os: macos-latest
           - ghc: 9.6
             os: ubuntu-latest
-          - ghc: 9.6
+          - ghc: 9.8
+            os: ubuntu-latest
+          - ghc: 9.8
             os: windows-latest
   cabal:
     name: Cabal
@@ -76,7 +78,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: splint-${{ github.sha }}-ghc-9.6-ubuntu-latest
+          name: splint-${{ github.sha }}-ghc-9.8-ubuntu-latest
       - run: tar --extract --file artifact.tar --verbose
       - uses: softprops/action-gh-release@v2
         with:
