@@ -33,16 +33,15 @@ parsedResultAction commandLineOptions _ parsedResult = do
       diagOpts = GHC.Driver.Config.Diagnostic.initDiagOpts dynFlags
   GHC.Plugins.liftIO $ do
     settings <- Settings.load commandLineOptions
-    let ideas =
-          uncurry HLint.applyHints settings
-            . pure
-            . HLint.createModuleEx
-            . GHC.Hs.hpm_module
-            $ GHC.Plugins.parsedResultModule parsedResult
     GHC.Driver.Errors.printOrThrowDiagnostics logger ghcMessageOpts diagOpts
       . GHC.Types.Error.mkMessages
       . GHC.Data.Bag.listToBag
-      $ fmap (ideaToWarnMsg diagOpts) ideas
+      . fmap (ideaToWarnMsg diagOpts)
+      . uncurry HLint.applyHints settings
+      . pure
+      . HLint.createModuleEx
+      . GHC.Hs.hpm_module
+      $ GHC.Plugins.parsedResultModule parsedResult
   pure parsedResult
 
 ideaToWarnMsg :: GHC.Utils.Error.DiagOpts -> HLint.Idea -> GHC.Driver.Errors.Types.WarnMsg
