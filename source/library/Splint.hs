@@ -24,10 +24,12 @@ plugin =
 
 parsedResultAction ::
   [GHC.Plugins.CommandLineOption] ->
-  modSummary ->
+  GHC.Plugins.ModSummary ->
   GHC.Plugins.ParsedResult ->
   GHC.Plugins.Hsc GHC.Plugins.ParsedResult
-parsedResultAction commandLineOptions _modSummary parsedResult = do
+parsedResultAction commandLineOptions modSummary parsedResult = do
+  let fp = GHC.Plugins.ms_hspp_file modSummary
+  GHC.Plugins.liftIO . IO.hPutStrLn IO.stderr $ "[splint] Processing " <> fp <> " ..."
   logger <- GHC.Utils.Logger.getLogger
   dynFlags <- GHC.Plugins.getDynFlags
   let ghcMessageOpts = GHC.Driver.Config.Diagnostic.initPrintConfig dynFlags
@@ -40,7 +42,7 @@ parsedResultAction commandLineOptions _modSummary parsedResult = do
             . HLint.createModuleEx
             . GHC.Hs.hpm_module
             $ GHC.Plugins.parsedResultModule parsedResult
-    mapM_ (IO.hPutStrLn IO.stderr . mappend "[splint] " . show) ideas
+    IO.hPutStrLn IO.stderr $ "[splint] Processed " <> fp <> ": " <> show (length ideas)
     GHC.Driver.Errors.printOrThrowDiagnostics logger ghcMessageOpts diagOpts
       . GHC.Types.Error.mkMessages
       . GHC.Data.Bag.listToBag
