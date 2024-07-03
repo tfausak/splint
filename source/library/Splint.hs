@@ -13,6 +13,7 @@ import qualified GHC.Utils.Logger
 import qualified Language.Haskell.HLint as HLint
 import qualified Splint.Replacement as Replacement
 import qualified Splint.Settings as Settings
+import qualified System.IO as IO
 
 plugin :: GHC.Plugins.Plugin
 plugin =
@@ -33,15 +34,17 @@ parsedResultAction commandLineOptions _modSummary parsedResult = do
       diagOpts = GHC.Driver.Config.Diagnostic.initDiagOpts dynFlags
   GHC.Plugins.liftIO $ do
     settings <- Settings.load commandLineOptions
+    let ideas =
+          uncurry HLint.applyHints settings
+            . pure
+            . HLint.createModuleEx
+            . GHC.Hs.hpm_module
+            $ GHC.Plugins.parsedResultModule parsedResult
+    mapM_ (IO.hPutStrLn IO.stderr . mappend "[splint] " . show) ideas
     GHC.Driver.Errors.printOrThrowDiagnostics logger ghcMessageOpts diagOpts
       . GHC.Types.Error.mkMessages
       . GHC.Data.Bag.listToBag
-      . fmap (ideaToWarnMsg diagOpts)
-      . uncurry HLint.applyHints settings
-      . pure
-      . HLint.createModuleEx
-      . GHC.Hs.hpm_module
-      $ GHC.Plugins.parsedResultModule parsedResult
+      $ fmap (ideaToWarnMsg diagOpts) ideas
   pure parsedResult
 
 ideaToWarnMsg :: GHC.Utils.Error.DiagOpts -> HLint.Idea -> GHC.Driver.Errors.Types.WarnMsg
