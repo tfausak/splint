@@ -13,7 +13,6 @@ import qualified GHC.Utils.Logger
 import qualified Language.Haskell.HLint as HLint
 import qualified Splint.Replacement as Replacement
 import qualified Splint.Settings as Settings
-import qualified System.IO as IO
 
 plugin :: GHC.Plugins.Plugin
 plugin =
@@ -24,29 +23,26 @@ plugin =
 
 parsedResultAction ::
   [GHC.Plugins.CommandLineOption] ->
-  GHC.Plugins.ModSummary ->
+  modSummary ->
   GHC.Plugins.ParsedResult ->
   GHC.Plugins.Hsc GHC.Plugins.ParsedResult
-parsedResultAction commandLineOptions modSummary parsedResult = do
-  let fp = GHC.Plugins.ms_hspp_file modSummary
-  GHC.Plugins.liftIO . IO.hPutStrLn IO.stderr $ "[splint] Processing " <> fp <> " ..."
+parsedResultAction commandLineOptions _ parsedResult = do
   logger <- GHC.Utils.Logger.getLogger
   dynFlags <- GHC.Plugins.getDynFlags
   let ghcMessageOpts = GHC.Driver.Config.Diagnostic.initPrintConfig dynFlags
       diagOpts = GHC.Driver.Config.Diagnostic.initDiagOpts dynFlags
   GHC.Plugins.liftIO $ do
     settings <- Settings.load commandLineOptions
-    let ideas =
-          uncurry HLint.applyHints settings
-            . pure
-            . HLint.createModuleEx
-            . GHC.Hs.hpm_module
-            $ GHC.Plugins.parsedResultModule parsedResult
-    IO.hPutStrLn IO.stderr $ "[splint] Processed " <> fp <> ": " <> show (length ideas)
     GHC.Driver.Errors.printOrThrowDiagnostics logger ghcMessageOpts diagOpts
       . GHC.Types.Error.mkMessages
       . GHC.Data.Bag.listToBag
-      $ fmap (ideaToWarnMsg diagOpts) ideas
+      . fmap (ideaToWarnMsg diagOpts)
+      . filter ((/=) HLint.Ignore . HLint.ideaSeverity)
+      . uncurry HLint.applyHints settings
+      . pure
+      . HLint.createModuleEx
+      . GHC.Hs.hpm_module
+      $ GHC.Plugins.parsedResultModule parsedResult
   pure parsedResult
 
 ideaToWarnMsg :: GHC.Utils.Error.DiagOpts -> HLint.Idea -> GHC.Driver.Errors.Types.WarnMsg
@@ -63,11 +59,7 @@ ideaToWarnMsg diagOpts idea =
             : fmap
               (GHC.Plugins.text . mappend "Note: " . show)
               (HLint.ideaNote idea)
-      diagnosticReason = case HLint.ideaSeverity idea of
-        HLint.Ignore -> GHC.Types.Error.WarningWithoutFlag
-        HLint.Suggestion -> GHC.Types.Error.WarningWithoutFlag
-        HLint.Warning -> GHC.Types.Error.WarningWithoutFlag
-        HLint.Error -> GHC.Types.Error.ErrorWithoutFlag
+      diagnosticReason = GHC.Types.Error.WarningWithoutFlag
       diagnosticMessage =
         GHC.Types.Error.DiagnosticMessage
           { GHC.Types.Error.diagHints = ghcHints,
