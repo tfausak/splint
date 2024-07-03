@@ -37,6 +37,7 @@ parsedResultAction commandLineOptions _ parsedResult = do
       . GHC.Types.Error.mkMessages
       . GHC.Data.Bag.listToBag
       . fmap (ideaToWarnMsg diagOpts)
+      . filter ((/=) HLint.Ignore . HLint.ideaSeverity)
       . uncurry HLint.applyHints settings
       . pure
       . HLint.createModuleEx
