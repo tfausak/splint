@@ -59,11 +59,7 @@ ideaToWarnMsg diagOpts idea =
             : fmap
               (GHC.Plugins.text . mappend "Note: " . show)
               (HLint.ideaNote idea)
-      diagnosticReason = case HLint.ideaSeverity idea of
-        HLint.Ignore -> GHC.Types.Error.WarningWithoutFlag
-        HLint.Suggestion -> GHC.Types.Error.WarningWithoutFlag
-        HLint.Warning -> GHC.Types.Error.WarningWithoutFlag
-        HLint.Error -> GHC.Types.Error.ErrorWithoutFlag
+      diagnosticReason = GHC.Types.Error.WarningWithoutFlag
       diagnosticMessage =
         GHC.Types.Error.DiagnosticMessage
           { GHC.Types.Error.diagHints = ghcHints,
