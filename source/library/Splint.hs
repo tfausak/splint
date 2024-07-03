@@ -29,7 +29,7 @@ parsedResultAction ::
   GHC.Plugins.Hsc GHC.Plugins.ParsedResult
 parsedResultAction commandLineOptions modSummary parsedResult = do
   let fp = GHC.Plugins.ms_hspp_file modSummary
-  IO.hPutStrLn IO.stderr $ "[splint] Processing " <> fp <> " ..."
+  GHC.Plugins.liftIO . IO.hPutStrLn IO.stderr $ "[splint] Processing " <> fp <> " ..."
   logger <- GHC.Utils.Logger.getLogger
   dynFlags <- GHC.Plugins.getDynFlags
   let ghcMessageOpts = GHC.Driver.Config.Diagnostic.initPrintConfig dynFlags
