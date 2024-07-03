@@ -5,6 +5,7 @@ import qualified Control.Exception as Exception
 import qualified Data.Map as Map
 import qualified Language.Haskell.HLint as HLint
 import qualified Splint.RemoteData as RemoteData
+import qualified System.IO as IO
 import qualified System.IO.Unsafe as Unsafe
 
 type Settings = ([HLint.Classify], HLint.Hint)
@@ -48,6 +49,7 @@ load commandLineOptions = do
     pure remoteData
   case remoteData of
     RemoteData.NotAsked -> do
+      IO.hPutStrLn IO.stderr $ "[splint] Loading settings for " <> show commandLineOptions <> " ..."
       result <-
         withTMVar semaphore
           . const
