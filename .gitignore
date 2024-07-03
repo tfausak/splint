@@ -1,2 +1,2 @@
-/.stack-work/
-/stack.yaml.lock
+/cabal.project.*
+/dist-newstyle/

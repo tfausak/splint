@@ -1,0 +1,7 @@
+packages: .
+
+package ghc-lib-parser-ex
+  flags: +no-ghc-lib
+
+package hlint
+  flags: -ghc-lib

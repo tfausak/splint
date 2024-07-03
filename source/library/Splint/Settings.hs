@@ -7,15 +7,15 @@ import qualified Language.Haskell.HLint as HLint
 import qualified Splint.RemoteData as RemoteData
 import qualified System.IO.Unsafe as Unsafe
 
-type Settings = (HLint.ParseFlags, [HLint.Classify], HLint.Hint)
+type Settings = ([HLint.Classify], HLint.Hint)
 
 -- | Getting settings is not instantaneous. Since settings are usually reused
 -- between modules, it makes sense to cache them. However each module can
 -- potentially customize its settings using the @OPTIONS_GHC@ pragma. This
 -- variable is used as a cache of settings keyed on the command line options.
-cache
-  :: Stm.TVar
-       (Map.Map [String] (RemoteData.RemoteData Exception.IOException Settings))
+cache ::
+  Stm.TVar
+    (Map.Map [String] (RemoteData.RemoteData Exception.IOException Settings))
 cache = Unsafe.unsafePerformIO $ Stm.newTVarIO Map.empty
 {-# NOINLINE cache #-}
 
@@ -29,17 +29,17 @@ semaphore = Unsafe.unsafePerformIO $ Stm.newTMVarIO ()
 {-# NOINLINE semaphore #-}
 
 withTMVar :: Stm.TMVar a -> (a -> IO b) -> IO b
-withTMVar x = Exception.bracket
-  (Stm.atomically $ Stm.takeTMVar x)
-  (Stm.atomically . Stm.putTMVar x)
+withTMVar x =
+  Exception.bracket
+    (Stm.atomically $ Stm.takeTMVar x)
+    (Stm.atomically . Stm.putTMVar x)
 
 load :: [String] -> IO Settings
 load commandLineOptions = do
   remoteData <- Stm.atomically $ do
     settings <- Stm.readTVar cache
-    let
-      remoteData =
-        Map.findWithDefault RemoteData.NotAsked commandLineOptions settings
+    let remoteData =
+          Map.findWithDefault RemoteData.NotAsked commandLineOptions settings
     case remoteData of
       RemoteData.NotAsked ->
         Stm.modifyTVar cache $ Map.insert commandLineOptions RemoteData.Loading
@@ -47,8 +47,12 @@ load commandLineOptions = do
       _ -> pure ()
     pure remoteData
   case remoteData of
-    RemoteData.NotAsked -> withTMVar semaphore . const $ do
-      result <- Exception.try $ HLint.argsSettings commandLineOptions
+    RemoteData.NotAsked -> do
+      result <-
+        withTMVar semaphore
+          . const
+          . Exception.try
+          $ HLint.argsSettings commandLineOptions
       case result of
         Left ioException -> do
           Stm.atomically
@@ -56,12 +60,12 @@ load commandLineOptions = do
             . Map.insert commandLineOptions
             $ RemoteData.Failure ioException
           Exception.throwIO ioException
-        Right settings -> do
+        Right (_, classifies, hint) -> do
           Stm.atomically
             . Stm.modifyTVar cache
             . Map.insert commandLineOptions
-            $ RemoteData.Success settings
-          pure settings
+            $ RemoteData.Success (classifies, hint)
+          pure (classifies, hint)
     RemoteData.Loading -> load commandLineOptions
     RemoteData.Failure ioException -> Exception.throwIO ioException
     RemoteData.Success settings -> pure settings
