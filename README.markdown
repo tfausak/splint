@@ -3,6 +3,8 @@
 [![CI](https://github.com/tfausak/splint/actions/workflows/ci.yml/badge.svg)](https://github.com/tfausak/splint/actions/workflows/ci.yml)
 [![Hackage](https://badgen.net/hackage/v/splint)](https://hackage.haskell.org/package/splint)
 
+:warning: This package is not maintained anymore.
+
 Splint makes [HLint 3][] available as a [GHC source plugin][]. It is similar to
 [hlint-source-plugin][] by Ollie Charles, except that it doesn't have to
 re-parse the module in order to lint it.
