@@ -1,7 +1,5 @@
 module Splint where
 
-import qualified Control.Concurrent as Concurrent
-import qualified Control.Monad as Monad
 import qualified Data.Maybe as Maybe
 import qualified GHC.Data.Bag
 import qualified GHC.Driver.Config.Diagnostic
@@ -33,7 +31,7 @@ parsedResultAction commandLineOptions _ parsedResult = do
   dynFlags <- GHC.Plugins.getDynFlags
   let ghcMessageOpts = GHC.Driver.Config.Diagnostic.initPrintConfig dynFlags
       diagOpts = GHC.Driver.Config.Diagnostic.initDiagOpts dynFlags
-  Monad.void . GHC.Plugins.liftIO . Concurrent.forkIO $ do
+  GHC.Plugins.liftIO $ do
     settings <- Settings.load commandLineOptions
     GHC.Driver.Errors.printOrThrowDiagnostics logger ghcMessageOpts diagOpts
       . GHC.Types.Error.mkMessages
