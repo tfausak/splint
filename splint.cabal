@@ -1,6 +1,6 @@
 cabal-version: 2.2
 name: splint
-version: 2.0.0.4
+version: 2.0.0.5
 synopsis: HLint as a GHC source plugin.
 description:
   Warning: This package is not maintained anymore.
